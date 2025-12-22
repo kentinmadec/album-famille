@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* CONFIGURATION */
   /* ===================== */
 
-  const BASE_URL = "https://f003.backblazeb2.com/file/album-famille";
+  const B2_BASE = "https://f003.backblazeb2.com/file";
   const ZIP_SERVER_URL = "https://album-zip-server.onrender.com/download-zip";
 
   /* ===================== */
@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentIndex = 0;
   let selectedImages = new Set();
 
-  /* Carrousel */
   let latestPhotos = [];
   let carouselIndex = 0;
 
@@ -56,9 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
       showCarouselImage();
       setInterval(nextCarousel, 5000);
     })
-    .catch(err => {
-      console.error("Erreur JSON :", err);
-    });
+    .catch(err => console.error("Erreur JSON :", err));
 
   /* ===================== */
   /* CARROUSEL (3 PHOTOS) */
@@ -68,21 +65,20 @@ document.addEventListener("DOMContentLoaded", () => {
     latestPhotos = [];
 
     Object.keys(photosData)
-      .sort((a, b) => b - a) // années récentes d’abord
+      .sort((a, b) => b - a)
       .forEach(year => {
         Object.values(photosData[year]).forEach(album => {
           album.forEach(path => {
-            latestPhotos.push(`${BASE_URL}/${path}`);
+            latestPhotos.push(`${B2_BASE}/${path}`);
           });
         });
       });
 
-    /* 🔥 LIMITATION À 3 PHOTOS */
     latestPhotos = latestPhotos.slice(0, 3);
   }
 
   function showCarouselImage() {
-    if (latestPhotos.length === 0) return;
+    if (!latestPhotos.length) return;
     carouselImg.src = latestPhotos[carouselIndex];
     carouselImg.onclick = () => openLightboxFromCarousel();
   }
@@ -144,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!photosData[year]?.[album]) return;
 
     photosData[year][album].forEach((path, index) => {
-      const url = `${BASE_URL}/${path}`;
+      const url = `${B2_BASE}/${path}`;
       currentImages.push(url);
 
       const div = document.createElement("div");
@@ -180,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   downloadBtn.onclick = async () => {
-    if (selectedImages.size === 0) {
+    if (!selectedImages.size) {
       alert("Aucune photo sélectionnée");
       return;
     }
