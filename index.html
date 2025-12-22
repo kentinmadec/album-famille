@@ -12,7 +12,7 @@
   <h1>📷 Album de la famille</h1>
 </header>
 
-<nav>
+<nav class="menu">
   <select id="yearSelect">
     <option value="">Choisir une année</option>
     <option value="2025">2025</option>
@@ -43,18 +43,13 @@
   </select>
 </nav>
 
-
-<p>Voici la dernière photo ajoutée !</p>
-
-<!-- CARROUSEL ACCUEIL -->
 <section class="carousel">
-  <button class="carousel-btn prev">❮</button>
   <img id="carouselImage" src="" alt="Dernières photos">
-  <button class="carousel-btn next">❯</button>
 </section>
 
 <div class="actions">
   <button id="selectAll">Tout sélectionner</button>
+  <button id="deselectAll">Tout désélectionner</button>
   <button id="downloadSelection">Télécharger la sélection (ZIP)</button>
 </div>
 
@@ -62,10 +57,8 @@
   <div id="gallery" class="gallery"></div>
 </main>
 
-<!-- LIGHTBOX -->
 <div id="lightbox" class="lightbox hidden">
   <button class="close">✕</button>
-  <button class="prev">❮</button>
 
   <label class="lightbox-check">
     <input type="checkbox" id="lightboxCheckbox">
@@ -73,8 +66,6 @@
   </label>
 
   <img id="lightboxImage" src="" alt="Photo">
-
-  <button class="next">❯</button>
 </div>
 
 <script src="script.js"></script>
