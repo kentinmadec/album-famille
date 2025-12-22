@@ -25,13 +25,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const lightboxImage = document.getElementById("lightboxImage");
   const lightboxCheckbox = document.getElementById("lightboxCheckbox");
 
-  /* JSON */
+  /* ===================== */
+  /* CHARGEMENT JSON */
+  /* ===================== */
+
   fetch("photo-data.json?v=" + Date.now())
     .then(r => r.json())
     .then(data => {
       photosData = data;
       buildCarousel();
     });
+
+  /* ===================== */
+  /* CARROUSEL (3 PHOTOS) */
+  /* ===================== */
 
   function buildCarousel() {
     latestPhotos = [];
@@ -44,10 +51,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (latestPhotos.length) carouselImg.src = latestPhotos[0];
   }
 
+  /* ===================== */
+  /* NAVIGATION */
+  /* ===================== */
+
+  header.onclick = () => location.reload();
+
   yearSelect.onchange = () => {
     albumSelect.innerHTML = `<option value="">Choisir un album</option>`;
     albumSelect.disabled = false;
     gallery.innerHTML = "";
+    selectedImages.clear();
 
     Object.keys(photosData[yearSelect.value] || {}).forEach(album => {
       const o = document.createElement("option");
@@ -63,6 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedImages.clear();
 
     const photos = photosData[yearSelect.value]?.[albumSelect.value] || [];
+
     photos.forEach((url, i) => {
       currentImages.push(url);
 
@@ -71,7 +86,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const cb = document.createElement("input");
       cb.type = "checkbox";
-      cb.onchange = () => cb.checked ? selectedImages.add(url) : selectedImages.delete(url);
+      cb.dataset.url = url;
+
+      cb.onchange = () => {
+        cb.checked ? selectedImages.add(url) : selectedImages.delete(url);
+      };
 
       const img = document.createElement("img");
       img.src = url;
@@ -83,6 +102,49 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
+  /* ===================== */
+  /* BOUTON TOUT SÉLECTIONNER */
+  /* ===================== */
+
+  selectAllBtn.onclick = () => {
+    document.querySelectorAll(".photo input[type='checkbox']").forEach(cb => {
+      cb.checked = true;
+      selectedImages.add(cb.dataset.url);
+    });
+  };
+
+  /* ===================== */
+  /* TÉLÉCHARGEMENT ZIP */
+  /* ===================== */
+
+  downloadBtn.onclick = async () => {
+    if (!selectedImages.size) {
+      alert("Aucune photo sélectionnée");
+      return;
+    }
+
+    const response = await fetch(ZIP_SERVER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ images: [...selectedImages] })
+    });
+
+    if (!response.ok) {
+      alert("Erreur lors de la création du ZIP");
+      return;
+    }
+
+    const blob = await response.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "photos-famille.zip";
+    a.click();
+  };
+
+  /* ===================== */
+  /* LIGHTBOX */
+  /* ===================== */
+
   function openLightbox(i){
     currentIndex = i;
     lightboxImage.src = currentImages[i];
@@ -92,21 +154,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   lightboxCheckbox.onchange = () => {
     const url = currentImages[currentIndex];
-    lightboxCheckbox.checked ? selectedImages.add(url) : selectedImages.delete(url);
-  };
-
-  downloadBtn.onclick = async () => {
-    if (!selectedImages.size) return alert("Aucune photo sélectionnée");
-    const r = await fetch(ZIP_SERVER_URL, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ images:[...selectedImages] })
-    });
-    const blob = await r.blob();
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "photos-famille.zip";
-    a.click();
+    lightboxCheckbox.checked
+      ? selectedImages.add(url)
+      : selectedImages.delete(url);
   };
 
 });
