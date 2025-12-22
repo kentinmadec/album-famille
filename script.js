@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* CHARGEMENT JSON */
   /* ===================== */
 
-  fetch("photo-data.json")
+  fetch("photo-data.json?v=" + Date.now())
     .then(r => r.json())
     .then(data => {
       photosData = data;
