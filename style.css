@@ -60,13 +60,13 @@ button {
   justify-content: center;
   gap: 10px;
   padding: 20px;
+  transition: opacity 0.3s ease;
 }
 
 .carousel img {
   max-width: 90%;
   max-height: 400px;
   border-radius: 8px;
-  cursor: pointer;
 }
 
 .carousel-btn {
