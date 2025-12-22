@@ -59,6 +59,16 @@ header {
   background: #1a252f;
 }
 
+
+
+p{
+  font-size: 28px;
+  text-align: center;
+  padding-top: 20px;
+}
+
+
+
 /* ===== CARROUSEL ===== */
 .carousel {
   display: flex;
@@ -132,6 +142,15 @@ header {
     width: 100%;
     max-width: 320px;
   }
+
+
+  p{
+    font-size: 28px;
+    text-align: center;
+    padding-top: 20px;
+  }
+
+
 
   .carousel {
     padding: 10px;
