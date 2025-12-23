@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let carouselPhotos = [];
   let carouselIndex = 0;
 
-  /* ===== GALLERY ===== */
+  /* ===== LIGHTBOX ===== */
   let currentImages = [];
   let currentIndex = 0;
 
@@ -26,7 +26,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const deselectAllBtn = document.getElementById("deselectAll");
   const downloadBtn = document.getElementById("downloadSelection");
 
-  /* ===== LIGHTBOX ===== */
   const lightbox = document.getElementById("lightbox");
   const lightboxImage = document.getElementById("lightboxImage");
   const lightboxCheckbox = document.getElementById("lightboxCheckbox");
@@ -36,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* CHARGEMENT JSON */
   /* ===================== */
   fetch("photo-data.json?v=" + Date.now())
-    .then(r => r.json())
+    .then(res => res.json())
     .then(data => {
       photosData = data;
       buildCarousel();
@@ -76,18 +75,17 @@ document.addEventListener("DOMContentLoaded", () => {
     carouselImg.src = carouselPhotos[carouselIndex];
   };
 
-  /* 👉 CLIC SUR IMAGE DU CARROUSEL = PLEIN ÉCRAN */
+  /* ✅ CLIC CARROUSEL → PLEIN ÉCRAN */
   carouselImg.onclick = () => {
     if (!carouselPhotos.length) return;
 
-    currentImages = [...carouselPhotos];
+    currentImages = carouselPhotos;
     currentIndex = carouselIndex;
-
     openLightbox();
   };
 
   /* ===================== */
-  /* NAVIGATION ANNÉES / ALBUMS */
+  /* NAVIGATION */
   /* ===================== */
   yearSelect.onchange = () => {
     albumSelect.innerHTML = `<option value="">Choisir un album</option>`;
@@ -123,9 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
       cb.type = "checkbox";
       cb.dataset.url = url;
       cb.onchange = () =>
-        cb.checked
-          ? selectedImages.add(url)
-          : selectedImages.delete(url);
+        cb.checked ? selectedImages.add(url) : selectedImages.delete(url);
 
       const img = document.createElement("img");
       img.src = url;
@@ -156,13 +152,10 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   /* ===================== */
-  /* TÉLÉCHARGEMENT ZIP */
+  /* ZIP */
   /* ===================== */
   downloadBtn.onclick = async () => {
-    if (!selectedImages.size) {
-      alert("Aucune photo sélectionnée");
-      return;
-    }
+    if (!selectedImages.size) return alert("Aucune photo sélectionnée");
 
     const res = await fetch(ZIP_SERVER_URL, {
       method: "POST",
@@ -170,10 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
       body: JSON.stringify({ images: [...selectedImages] })
     });
 
-    if (!res.ok) {
-      alert("Erreur lors de la création du ZIP");
-      return;
-    }
+    if (!res.ok) return alert("Erreur lors de la création du ZIP");
 
     const blob = await res.blob();
     const a = document.createElement("a");
