@@ -5,11 +5,14 @@ document.addEventListener("DOMContentLoaded", () => {
   let photosData = {};
   let selectedImages = new Set();
 
+  /* ===== CARROUSEL ===== */
   let carouselPhotos = [];
   let carouselIndex = 0;
 
+  /* ===== LIGHTBOX ===== */
   let currentImages = [];
   let currentIndex = 0;
+  let inAlbum = false;
 
   const header = document.getElementById("header");
   const yearSelect = document.getElementById("yearSelect");
@@ -28,13 +31,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const lightbox = document.getElementById("lightbox");
   const lightboxImage = document.getElementById("lightboxImage");
-  const lightboxCheckbox = document.getElementById("lightboxCheckbox");
   const lightboxClose = document.querySelector(".lightbox .close");
+
+  const lightboxPrev = document.getElementById("lightboxPrev");
+  const lightboxNext = document.getElementById("lightboxNext");
 
   /* =====================
      ÉTAT INITIAL
   ===================== */
-  actions.style.display = "none";      // ❌ boutons cachés à l’accueil
+  actions.style.display = "none";
   lightbox.classList.add("hidden");
 
   /* =====================
@@ -47,16 +52,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     gallery.innerHTML = "";
     selectedImages.clear();
-    currentImages = [];
-    currentIndex = 0;
 
     carousel.style.display = "flex";
-    actions.style.display = "none";    // ❌ boutons cachés
+    actions.style.display = "none";
+
     lightbox.classList.add("hidden");
   });
 
   /* =====================
-     CHARGEMENT JSON
+     JSON
   ===================== */
   fetch("photo-data.json?v=" + Date.now())
     .then(res => res.json())
@@ -66,8 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   /* =====================
-     CARROUSEL (3 PHOTOS)
-     → AUCUNE SÉLECTION
+     CARROUSEL (VISUEL)
   ===================== */
   function buildCarousel() {
     carouselPhotos = [];
@@ -100,12 +103,10 @@ document.addEventListener("DOMContentLoaded", () => {
     carouselImg.src = carouselPhotos[carouselIndex];
   };
 
-  /* ✅ clic carrousel = plein écran SEULEMENT */
   carouselImg.onclick = () => {
     currentImages = carouselPhotos;
     currentIndex = carouselIndex;
-
-    lightboxCheckbox.style.display = "none"; // ❌ pas de sélection carrousel
+    inAlbum = false;
     openLightbox();
   };
 
@@ -120,23 +121,23 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedImages.clear();
 
     carousel.style.display = "flex";
-    actions.style.display = "none"; // toujours caché tant qu’album non choisi
+    actions.style.display = "none";
   };
 
   albumSelect.onchange = () => {
     gallery.innerHTML = "";
     selectedImages.clear();
-    currentImages = [];
 
     carousel.style.display = "none";
-    actions.style.display = "flex"; // ✅ boutons visibles DANS UN ALBUM
+    actions.style.display = "flex";
 
     const photos =
       photosData[yearSelect.value]?.[albumSelect.value] || [];
 
-    photos.forEach((url, i) => {
-      currentImages.push(url);
+    currentImages = photos;
+    inAlbum = true;
 
+    photos.forEach((url, i) => {
       const div = document.createElement("div");
       div.className = "photo";
 
@@ -150,7 +151,6 @@ document.addEventListener("DOMContentLoaded", () => {
       img.src = url;
       img.onclick = () => {
         currentIndex = i;
-        lightboxCheckbox.style.display = "block"; // ✅ sélection possible album
         openLightbox();
       };
 
@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   /* =====================
-     SÉLECTION (ALBUMS)
+     SÉLECTION (MINIATURES)
   ===================== */
   selectAllBtn.onclick = () => {
     document.querySelectorAll(".photo input").forEach(cb => {
@@ -172,7 +172,6 @@ document.addEventListener("DOMContentLoaded", () => {
   deselectAllBtn.onclick = () => {
     document.querySelectorAll(".photo input").forEach(cb => cb.checked = false);
     selectedImages.clear();
-    lightboxCheckbox.checked = false;
   };
 
   /* =====================
@@ -207,16 +206,25 @@ document.addEventListener("DOMContentLoaded", () => {
   ===================== */
   function openLightbox() {
     lightboxImage.src = currentImages[currentIndex];
-    lightboxCheckbox.checked =
-      selectedImages.has(currentImages[currentIndex]);
     lightbox.classList.remove("hidden");
+
+    // flèches UNIQUEMENT dans un album
+    lightboxPrev.style.display = inAlbum ? "block" : "none";
+    lightboxNext.style.display = inAlbum ? "block" : "none";
   }
 
-  lightboxCheckbox.onchange = () => {
-    const url = currentImages[currentIndex];
-    lightboxCheckbox.checked
-      ? selectedImages.add(url)
-      : selectedImages.delete(url);
+  lightboxPrev.onclick = (e) => {
+    e.stopPropagation();
+    currentIndex =
+      (currentIndex - 1 + currentImages.length) % currentImages.length;
+    lightboxImage.src = currentImages[currentIndex];
+  };
+
+  lightboxNext.onclick = (e) => {
+    e.stopPropagation();
+    currentIndex =
+      (currentIndex + 1) % currentImages.length;
+    lightboxImage.src = currentImages[currentIndex];
   };
 
   lightboxClose.onclick = () => {
