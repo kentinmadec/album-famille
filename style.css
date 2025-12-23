@@ -40,14 +40,23 @@ header {
 }
 
 /* ======================
-   ACTIONS
+   TEXTE ACCUEIL
+====================== */
+  p{
+    font-size: 28px;
+    text-align: center;
+    padding-top: 20px;
+  }
+
+/* ======================
+   ACTIONS (ALBUMS SEULEMENT)
 ====================== */
 .actions {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 20px;
+  margin: 20px 0;
 }
 
 .actions button {
@@ -64,14 +73,6 @@ header {
   background: #1a252f;
 }
 
-
-  p{
-    font-size: 28px;
-    text-align: center;
-    padding-top: 20px;
-  }
-
-
 /* ======================
    CARROUSEL
 ====================== */
@@ -79,25 +80,26 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 15px;
+  gap: 20px;
   padding: 20px;
 }
 
 .carousel img {
   max-width: 100%;
-  max-height: 380px;
+  max-height: 360px;
   border-radius: 10px;
   cursor: pointer;
 }
 
+/* Flèches carrousel */
 .carousel-btn {
-  font-size: 32px;
+  font-size: 42px;
   background: #2c3e50;
   color: white;
   border: none;
   border-radius: 50%;
-  width: 45px;
-  height: 45px;
+  width: 60px;
+  height: 60px;
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -162,30 +164,39 @@ header {
   position: fixed;
   top: 20px;
   right: 25px;
-  font-size: 32px;
+  font-size: 36px;
   background: none;
   border: none;
   color: white;
   cursor: pointer;
-  z-index: 10000;
+  z-index: 10001;
 }
 
-/* Checkbox sélection */
-.lightbox-check {
+/* Flèches plein écran (albums uniquement) */
+.lightbox-nav {
   position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 60px;
   color: white;
-  font-size: 18px;
-  background: rgba(0, 0, 0, 0.6);
-  padding: 8px 14px;
-  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border: none;
+  padding: 20px;
+  cursor: pointer;
+  z-index: 10001;
+  border-radius: 50%;
 }
 
-.lightbox-check input {
-  transform: scale(1.4);
-  margin-right: 8px;
+#lightboxPrev {
+  left: 30px;
+}
+
+#lightboxNext {
+  right: 30px;
+}
+
+.lightbox-nav:hover {
+  background: rgba(0, 0, 0, 0.7);
 }
 
 /* ======================
@@ -205,7 +216,7 @@ header {
   }
 
 
-    p{
+  p{
     font-size: 28px;
     text-align: center;
     padding-top: 20px;
@@ -217,9 +228,14 @@ header {
   }
 
   .carousel-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 26px;
+    font-size: 36px;
+    width: 55px;
+    height: 55px;
+  }
+
+  .lightbox-nav {
+    font-size: 50px;
+    padding: 16px;
   }
 
   .gallery {
@@ -235,9 +251,9 @@ header {
   }
 
   .carousel-btn {
-    width: 36px;
-    height: 36px;
-    font-size: 22px;
+    width: 50px;
+    height: 50px;
+    font-size: 32px;
   }
 
   .photo input {
