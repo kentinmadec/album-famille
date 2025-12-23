@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentImages = [];
   let currentIndex = 0;
 
+  const header = document.getElementById("header");
   const yearSelect = document.getElementById("yearSelect");
   const albumSelect = document.getElementById("albumSelect");
   const gallery = document.getElementById("gallery");
@@ -29,12 +30,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const lightboxCheckbox = document.getElementById("lightboxCheckbox");
   const lightboxClose = document.querySelector(".lightbox .close");
 
-  /* 🔒 SÉCURITÉ : on force la lightbox à être fermée au départ */
+  /* 🔒 Toujours fermer la lightbox au départ */
   lightbox.classList.add("hidden");
 
-  /* ===================== */
-  /* JSON */
-  /* ===================== */
+  /* =====================
+     HEADER → ACCUEIL
+  ===================== */
+  header.addEventListener("click", () => {
+    // Réinitialisation des menus
+    yearSelect.value = "";
+    albumSelect.innerHTML = `<option value="">Choisir un album</option>`;
+    albumSelect.disabled = true;
+
+    // Réinitialisation des contenus
+    gallery.innerHTML = "";
+    selectedImages.clear();
+    currentImages = [];
+    currentIndex = 0;
+
+    // Réaffichage du carrousel
+    carousel.style.display = "flex";
+
+    // Fermeture lightbox si ouverte
+    lightbox.classList.add("hidden");
+  });
+
+  /* =====================
+     CHARGEMENT JSON
+  ===================== */
   fetch("photo-data.json?v=" + Date.now())
     .then(res => res.json())
     .then(data => {
@@ -42,9 +65,9 @@ document.addEventListener("DOMContentLoaded", () => {
       buildCarousel();
     });
 
-  /* ===================== */
-  /* CARROUSEL (3 PHOTOS) */
-  /* ===================== */
+  /* =====================
+     CARROUSEL (3 PHOTOS)
+  ===================== */
   function buildCarousel() {
     carouselPhotos = [];
 
@@ -76,16 +99,15 @@ document.addEventListener("DOMContentLoaded", () => {
     carouselImg.src = carouselPhotos[carouselIndex];
   };
 
-  /* ✅ PLEIN ÉCRAN UNIQUEMENT AU CLIC */
   carouselImg.onclick = () => {
     currentImages = carouselPhotos;
     currentIndex = carouselIndex;
     openLightbox();
   };
 
-  /* ===================== */
-  /* ANNÉES / ALBUMS */
-  /* ===================== */
+  /* =====================
+     ANNÉES / ALBUMS
+  ===================== */
   yearSelect.onchange = () => {
     albumSelect.innerHTML = `<option value="">Choisir un album</option>`;
     albumSelect.disabled = false;
@@ -134,9 +156,25 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  /* ===================== */
-  /* ZIP */
-  /* ===================== */
+  /* =====================
+     SÉLECTION
+  ===================== */
+  selectAllBtn.onclick = () => {
+    document.querySelectorAll(".photo input").forEach(cb => {
+      cb.checked = true;
+      selectedImages.add(cb.dataset.url);
+    });
+  };
+
+  deselectAllBtn.onclick = () => {
+    document.querySelectorAll(".photo input").forEach(cb => cb.checked = false);
+    selectedImages.clear();
+    lightboxCheckbox.checked = false;
+  };
+
+  /* =====================
+     ZIP
+  ===================== */
   downloadBtn.onclick = async () => {
     if (!selectedImages.size) {
       alert("Aucune photo sélectionnée");
@@ -161,15 +199,22 @@ document.addEventListener("DOMContentLoaded", () => {
     a.click();
   };
 
-  /* ===================== */
-  /* LIGHTBOX */
-  /* ===================== */
+  /* =====================
+     LIGHTBOX
+  ===================== */
   function openLightbox() {
     lightboxImage.src = currentImages[currentIndex];
     lightboxCheckbox.checked =
       selectedImages.has(currentImages[currentIndex]);
     lightbox.classList.remove("hidden");
   }
+
+  lightboxCheckbox.onchange = () => {
+    const url = currentImages[currentIndex];
+    lightboxCheckbox.checked
+      ? selectedImages.add(url)
+      : selectedImages.delete(url);
+  };
 
   lightboxClose.onclick = () => {
     lightbox.classList.add("hidden");
