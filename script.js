@@ -5,11 +5,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let photosData = {};
   let selectedImages = new Set();
 
-  /* ===== CARROUSEL ===== */
   let carouselPhotos = [];
   let carouselIndex = 0;
 
-  /* ===== LIGHTBOX ===== */
   let currentImages = [];
   let currentIndex = 0;
 
@@ -31,8 +29,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const lightboxCheckbox = document.getElementById("lightboxCheckbox");
   const lightboxClose = document.querySelector(".lightbox .close");
 
+  /* 🔒 SÉCURITÉ : on force la lightbox à être fermée au départ */
+  lightbox.classList.add("hidden");
+
   /* ===================== */
-  /* CHARGEMENT JSON */
+  /* JSON */
   /* ===================== */
   fetch("photo-data.json?v=" + Date.now())
     .then(res => res.json())
@@ -75,17 +76,15 @@ document.addEventListener("DOMContentLoaded", () => {
     carouselImg.src = carouselPhotos[carouselIndex];
   };
 
-  /* 👉 CLIC CARROUSEL = PLEIN ÉCRAN (MOBILE + DESKTOP) */
-  carouselImg.addEventListener("click", () => {
-    if (!carouselPhotos.length) return;
-
+  /* ✅ PLEIN ÉCRAN UNIQUEMENT AU CLIC */
+  carouselImg.onclick = () => {
     currentImages = carouselPhotos;
     currentIndex = carouselIndex;
     openLightbox();
-  });
+  };
 
   /* ===================== */
-  /* NAVIGATION ANNÉES / ALBUMS */
+  /* ANNÉES / ALBUMS */
   /* ===================== */
   yearSelect.onchange = () => {
     albumSelect.innerHTML = `<option value="">Choisir un album</option>`;
@@ -125,32 +124,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const img = document.createElement("img");
       img.src = url;
-
-      /* 👉 CLIC PHOTO ALBUM = PLEIN ÉCRAN (MOBILE + DESKTOP) */
-      img.addEventListener("click", () => {
+      img.onclick = () => {
         currentIndex = i;
         openLightbox();
-      });
+      };
 
       div.append(cb, img);
       gallery.appendChild(div);
     });
-  };
-
-  /* ===================== */
-  /* SÉLECTION */
-  /* ===================== */
-  selectAllBtn.onclick = () => {
-    document.querySelectorAll(".photo input").forEach(cb => {
-      cb.checked = true;
-      selectedImages.add(cb.dataset.url);
-    });
-  };
-
-  deselectAllBtn.onclick = () => {
-    document.querySelectorAll(".photo input").forEach(cb => cb.checked = false);
-    selectedImages.clear();
-    lightboxCheckbox.checked = false;
   };
 
   /* ===================== */
@@ -190,18 +171,10 @@ document.addEventListener("DOMContentLoaded", () => {
     lightbox.classList.remove("hidden");
   }
 
-  lightboxCheckbox.onchange = () => {
-    const url = currentImages[currentIndex];
-    lightboxCheckbox.checked
-      ? selectedImages.add(url)
-      : selectedImages.delete(url);
-  };
-
   lightboxClose.onclick = () => {
     lightbox.classList.add("hidden");
   };
 
-  /* 👉 FERMETURE AU TAP SUR LE FOND (MOBILE FRIENDLY) */
   lightbox.addEventListener("click", (e) => {
     if (e.target === lightbox) {
       lightbox.classList.add("hidden");
