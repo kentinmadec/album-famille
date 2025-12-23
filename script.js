@@ -75,17 +75,17 @@ document.addEventListener("DOMContentLoaded", () => {
     carouselImg.src = carouselPhotos[carouselIndex];
   };
 
-  /* ✅ CLIC CARROUSEL → PLEIN ÉCRAN */
-  carouselImg.onclick = () => {
+  /* 👉 CLIC CARROUSEL = PLEIN ÉCRAN (MOBILE + DESKTOP) */
+  carouselImg.addEventListener("click", () => {
     if (!carouselPhotos.length) return;
 
     currentImages = carouselPhotos;
     currentIndex = carouselIndex;
     openLightbox();
-  };
+  });
 
   /* ===================== */
-  /* NAVIGATION */
+  /* NAVIGATION ANNÉES / ALBUMS */
   /* ===================== */
   yearSelect.onchange = () => {
     albumSelect.innerHTML = `<option value="">Choisir un album</option>`;
@@ -125,10 +125,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const img = document.createElement("img");
       img.src = url;
-      img.onclick = () => {
+
+      /* 👉 CLIC PHOTO ALBUM = PLEIN ÉCRAN (MOBILE + DESKTOP) */
+      img.addEventListener("click", () => {
         currentIndex = i;
         openLightbox();
-      };
+      });
 
       div.append(cb, img);
       gallery.appendChild(div);
@@ -155,7 +157,10 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ZIP */
   /* ===================== */
   downloadBtn.onclick = async () => {
-    if (!selectedImages.size) return alert("Aucune photo sélectionnée");
+    if (!selectedImages.size) {
+      alert("Aucune photo sélectionnée");
+      return;
+    }
 
     const res = await fetch(ZIP_SERVER_URL, {
       method: "POST",
@@ -163,7 +168,10 @@ document.addEventListener("DOMContentLoaded", () => {
       body: JSON.stringify({ images: [...selectedImages] })
     });
 
-    if (!res.ok) return alert("Erreur lors de la création du ZIP");
+    if (!res.ok) {
+      alert("Erreur lors de la création du ZIP");
+      return;
+    }
 
     const blob = await res.blob();
     const a = document.createElement("a");
@@ -192,5 +200,12 @@ document.addEventListener("DOMContentLoaded", () => {
   lightboxClose.onclick = () => {
     lightbox.classList.add("hidden");
   };
+
+  /* 👉 FERMETURE AU TAP SUR LE FOND (MOBILE FRIENDLY) */
+  lightbox.addEventListener("click", (e) => {
+    if (e.target === lightbox) {
+      lightbox.classList.add("hidden");
+    }
+  });
 
 });
