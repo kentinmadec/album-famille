@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const prevBtn = document.getElementById("carouselPrev");
   const nextBtn = document.getElementById("carouselNext");
 
+  const actions = document.querySelector(".actions");
   const selectAllBtn = document.getElementById("selectAll");
   const deselectAllBtn = document.getElementById("deselectAll");
   const downloadBtn = document.getElementById("downloadSelection");
@@ -30,28 +31,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const lightboxCheckbox = document.getElementById("lightboxCheckbox");
   const lightboxClose = document.querySelector(".lightbox .close");
 
-  /* 🔒 Toujours fermer la lightbox au départ */
+  /* =====================
+     ÉTAT INITIAL
+  ===================== */
+  actions.style.display = "none";      // ❌ boutons cachés à l’accueil
   lightbox.classList.add("hidden");
 
   /* =====================
      HEADER → ACCUEIL
   ===================== */
   header.addEventListener("click", () => {
-    // Réinitialisation des menus
     yearSelect.value = "";
     albumSelect.innerHTML = `<option value="">Choisir un album</option>`;
     albumSelect.disabled = true;
 
-    // Réinitialisation des contenus
     gallery.innerHTML = "";
     selectedImages.clear();
     currentImages = [];
     currentIndex = 0;
 
-    // Réaffichage du carrousel
     carousel.style.display = "flex";
-
-    // Fermeture lightbox si ouverte
+    actions.style.display = "none";    // ❌ boutons cachés
     lightbox.classList.add("hidden");
   });
 
@@ -67,6 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* =====================
      CARROUSEL (3 PHOTOS)
+     → AUCUNE SÉLECTION
   ===================== */
   function buildCarousel() {
     carouselPhotos = [];
@@ -99,9 +100,12 @@ document.addEventListener("DOMContentLoaded", () => {
     carouselImg.src = carouselPhotos[carouselIndex];
   };
 
+  /* ✅ clic carrousel = plein écran SEULEMENT */
   carouselImg.onclick = () => {
     currentImages = carouselPhotos;
     currentIndex = carouselIndex;
+
+    lightboxCheckbox.style.display = "none"; // ❌ pas de sélection carrousel
     openLightbox();
   };
 
@@ -111,23 +115,21 @@ document.addEventListener("DOMContentLoaded", () => {
   yearSelect.onchange = () => {
     albumSelect.innerHTML = `<option value="">Choisir un album</option>`;
     albumSelect.disabled = false;
+
     gallery.innerHTML = "";
     selectedImages.clear();
-    carousel.style.display = "flex";
 
-    Object.keys(photosData[yearSelect.value] || {}).forEach(album => {
-      const opt = document.createElement("option");
-      opt.value = album;
-      opt.textContent = album;
-      albumSelect.appendChild(opt);
-    });
+    carousel.style.display = "flex";
+    actions.style.display = "none"; // toujours caché tant qu’album non choisi
   };
 
   albumSelect.onchange = () => {
     gallery.innerHTML = "";
     selectedImages.clear();
     currentImages = [];
+
     carousel.style.display = "none";
+    actions.style.display = "flex"; // ✅ boutons visibles DANS UN ALBUM
 
     const photos =
       photosData[yearSelect.value]?.[albumSelect.value] || [];
@@ -148,6 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
       img.src = url;
       img.onclick = () => {
         currentIndex = i;
+        lightboxCheckbox.style.display = "block"; // ✅ sélection possible album
         openLightbox();
       };
 
@@ -157,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   /* =====================
-     SÉLECTION
+     SÉLECTION (ALBUMS)
   ===================== */
   selectAllBtn.onclick = () => {
     document.querySelectorAll(".photo input").forEach(cb => {
