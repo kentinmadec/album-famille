@@ -5,11 +5,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let photosData = {};
   let selectedImages = new Set();
 
-  /* ===== CARROUSEL ===== */
   let carouselPhotos = [];
   let carouselIndex = 0;
 
-  /* ===== LIGHTBOX ===== */
   let currentImages = [];
   let currentIndex = 0;
   let inAlbum = false;
@@ -32,74 +30,48 @@ document.addEventListener("DOMContentLoaded", () => {
   const lightbox = document.getElementById("lightbox");
   const lightboxImage = document.getElementById("lightboxImage");
   const lightboxClose = document.querySelector(".lightbox .close");
-
   const lightboxPrev = document.getElementById("lightboxPrev");
   const lightboxNext = document.getElementById("lightboxNext");
 
-  /* =====================
-     ÉTAT INITIAL
-  ===================== */
   actions.style.display = "none";
   lightbox.classList.add("hidden");
 
-  /* =====================
-     HEADER → ACCUEIL
-  ===================== */
-  header.addEventListener("click", () => {
+  header.onclick = () => {
     yearSelect.value = "";
     albumSelect.innerHTML = `<option value="">Choisir un album</option>`;
     albumSelect.disabled = true;
-
     gallery.innerHTML = "";
     selectedImages.clear();
-
     carousel.style.display = "flex";
     actions.style.display = "none";
-
     lightbox.classList.add("hidden");
-  });
+  };
 
-  /* =====================
-     JSON
-  ===================== */
   fetch("photo-data.json?v=" + Date.now())
-    .then(res => res.json())
+    .then(r => r.json())
     .then(data => {
       photosData = data;
       buildCarousel();
     });
 
-  /* =====================
-     CARROUSEL (VISUEL)
-  ===================== */
   function buildCarousel() {
     carouselPhotos = [];
-
-    Object.keys(photosData)
-      .sort((a, b) => b - a)
-      .forEach(year => {
-        Object.values(photosData[year]).forEach(album => {
-          album.forEach(url => carouselPhotos.push(url));
-        });
+    Object.keys(photosData).sort((a,b)=>b-a).forEach(year => {
+      Object.values(photosData[year]).forEach(album => {
+        album.forEach(url => carouselPhotos.push(url));
       });
-
-    carouselPhotos = carouselPhotos.slice(0, 3);
-
-    if (carouselPhotos.length) {
-      carouselIndex = 0;
-      carouselImg.src = carouselPhotos[0];
-    }
+    });
+    carouselPhotos = carouselPhotos.slice(0,3);
+    if (carouselPhotos.length) carouselImg.src = carouselPhotos[0];
   }
 
   prevBtn.onclick = () => {
-    carouselIndex =
-      (carouselIndex - 1 + carouselPhotos.length) % carouselPhotos.length;
+    carouselIndex = (carouselIndex - 1 + carouselPhotos.length) % carouselPhotos.length;
     carouselImg.src = carouselPhotos[carouselIndex];
   };
 
   nextBtn.onclick = () => {
-    carouselIndex =
-      (carouselIndex + 1) % carouselPhotos.length;
+    carouselIndex = (carouselIndex + 1) % carouselPhotos.length;
     carouselImg.src = carouselPhotos[carouselIndex];
   };
 
@@ -110,30 +82,30 @@ document.addEventListener("DOMContentLoaded", () => {
     openLightbox();
   };
 
-  /* =====================
-     ANNÉES / ALBUMS
-  ===================== */
   yearSelect.onchange = () => {
     albumSelect.innerHTML = `<option value="">Choisir un album</option>`;
     albumSelect.disabled = false;
-
     gallery.innerHTML = "";
     selectedImages.clear();
-
-    carousel.style.display = "flex";
     actions.style.display = "none";
+    carousel.style.display = "flex";
+
+    const albums = photosData[yearSelect.value] || {};
+    Object.keys(albums).forEach(album => {
+      const opt = document.createElement("option");
+      opt.value = album;
+      opt.textContent = album;
+      albumSelect.appendChild(opt);
+    });
   };
 
   albumSelect.onchange = () => {
     gallery.innerHTML = "";
     selectedImages.clear();
-
     carousel.style.display = "none";
     actions.style.display = "flex";
 
-    const photos =
-      photosData[yearSelect.value]?.[albumSelect.value] || [];
-
+    const photos = photosData[yearSelect.value]?.[albumSelect.value] || [];
     currentImages = photos;
     inAlbum = true;
 
@@ -159,9 +131,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  /* =====================
-     SÉLECTION (MINIATURES)
-  ===================== */
   selectAllBtn.onclick = () => {
     document.querySelectorAll(".photo input").forEach(cb => {
       cb.checked = true;
@@ -174,14 +143,8 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedImages.clear();
   };
 
-  /* =====================
-     ZIP
-  ===================== */
   downloadBtn.onclick = async () => {
-    if (!selectedImages.size) {
-      alert("Aucune photo sélectionnée");
-      return;
-    }
+    if (!selectedImages.size) return alert("Aucune photo sélectionnée");
 
     const res = await fetch(ZIP_SERVER_URL, {
       method: "POST",
@@ -189,10 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
       body: JSON.stringify({ images: [...selectedImages] })
     });
 
-    if (!res.ok) {
-      alert("Erreur lors de la création du ZIP");
-      return;
-    }
+    if (!res.ok) return alert("Erreur ZIP");
 
     const blob = await res.blob();
     const a = document.createElement("a");
@@ -201,40 +161,29 @@ document.addEventListener("DOMContentLoaded", () => {
     a.click();
   };
 
-  /* =====================
-     LIGHTBOX
-  ===================== */
   function openLightbox() {
     lightboxImage.src = currentImages[currentIndex];
     lightbox.classList.remove("hidden");
-
-    // flèches UNIQUEMENT dans un album
     lightboxPrev.style.display = inAlbum ? "block" : "none";
     lightboxNext.style.display = inAlbum ? "block" : "none";
   }
 
-  lightboxPrev.onclick = (e) => {
+  lightboxPrev.onclick = e => {
     e.stopPropagation();
-    currentIndex =
-      (currentIndex - 1 + currentImages.length) % currentImages.length;
+    currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
     lightboxImage.src = currentImages[currentIndex];
   };
 
-  lightboxNext.onclick = (e) => {
+  lightboxNext.onclick = e => {
     e.stopPropagation();
-    currentIndex =
-      (currentIndex + 1) % currentImages.length;
+    currentIndex = (currentIndex + 1) % currentImages.length;
     lightboxImage.src = currentImages[currentIndex];
   };
 
-  lightboxClose.onclick = () => {
-    lightbox.classList.add("hidden");
-  };
+  lightboxClose.onclick = () => lightbox.classList.add("hidden");
 
-  lightbox.addEventListener("click", (e) => {
-    if (e.target === lightbox) {
-      lightbox.classList.add("hidden");
-    }
-  });
+  lightbox.onclick = e => {
+    if (e.target === lightbox) lightbox.classList.add("hidden");
+  };
 
 });
